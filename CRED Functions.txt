@@ -1,0 +1,149 @@
+CRED OPERATIONS:
+
+package com.credfunctions.Credexample1.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name= "STUDENT_TABLE")
+public class Studentrecord {
+@Id
+@GeneratedValue
+    private int id;
+    private String name;
+    private String Department;
+
+}
+
+Main function:
+
+package com.credfunctions.Credexample1;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Credexample1Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Credexample1Application.class, args);
+	}
+
+}
+
+Repository
+
+package com.credfunctions.Credexample1.repository;
+
+import com.credfunctions.Credexample1.entity.Studentrecord;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface Studentrepository extends JpaRepository<Studentrecord, Integer> {
+    Studentrecord findByName(String name);
+    Studentrecord findByDept(String dept);
+}
+
+Service
+package com.credfunctions.Credexample1.service;
+
+
+import com.credfunctions.Credexample1.entity.Studentrecord;
+import com.credfunctions.Credexample1.repository.Studentrepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class Studentservice {
+@Autowired
+    private Studentrepository repository;
+
+public Studentrecord saveStudentrecord(Studentrecord Studentrecord){
+    return repository.save(Studentrecord);
+}
+    public List<Studentrecord> saveStudentrecords(List<Studentrecord> Studentrecords){
+        return repository.saveAll(Studentrecords);
+    }
+
+    public List<Studentrecord> getStudentrecords(){
+    return repository.findAll();
+    }
+    public Studentrecord getStudentrecordById(int id){ // one object wants to return
+        return repository.findById(id).orElse(null);
+    }
+    public Studentrecord getStudentrecordByName(String name){
+        return repository.findByName(name);
+    }
+    public Studentrecord getStudentrecordByDept(String Dept){
+        return repository.findByDept(Dept);
+    }
+    public String deleteStudentrecord(int id){
+    repository.deleteById(id);
+    return "product removed !! "+id;
+    }
+
+    public Studentrecord updateStudentrecord(Studentrecord Studentrecord){
+        Studentrecord existingStudentrecord=repository.findById(Studentrecord.getId()).orElse(null);
+        existingStudentrecord.setName(Studentrecord.getName());
+        existingStudentrecord.setDepartment(Studentrecord.getDepartment());
+        return repository.save(existingStudentrecord);
+
+    }
+
+}
+Controller:
+package com.credfunctions.Credexample1.controller;
+
+import com.credfunctions.Credexample1.entity.Studentrecord;
+import com.credfunctions.Credexample1.service.Studentservice;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+public class Studentcontroller {
+@Autowired
+    private Studentservice service;
+@PostMapping("/addStudentrecord")
+public Studentrecord addStudentrecord(@RequestBody Studentrecord studentrecord){
+    return service.saveStudentrecord(studentrecord);
+}
+    @PostMapping("/addStudentrecords")
+    public List<Studentrecord> addStudentrecord(@RequestBody List<Studentrecord> studentrecords){
+        return service.saveStudentrecords(studentrecords);
+    }
+    @GetMapping("/Studentrecords")
+    public List<Studentrecord> findAllStudentrecord(){
+    return service.getStudentrecords();
+    }
+    @GetMapping("/Studentrecord/ {id}")
+    public Studentrecord findStudentById(@PathVariable("id") int id){
+    return service.getStudentrecordById(id);
+    }
+    @GetMapping("/Studentrecord/ {name}")
+    public Studentrecord findStudentByName(@PathVariable("name") String name){
+        return service.getStudentrecordByName(name);
+    }
+    @GetMapping("/Studentrecord/ {dept}")
+    public Studentrecord findStudentByDept(@PathVariable("dept") String Dept){
+        return service.getStudentrecordByDept(Dept);
+    }
+    @PutMapping("/update Studentrecord")
+    public Studentrecord updateStudentrecord(@RequestBody Studentrecord studentrecord) {
+        return service.updateStudentrecord(studentrecord);
+    }
+    @DeleteMapping("/delete/{id}")
+    public String deleteStudentrecord(@PathVariable int id){
+        return service.deleteStudentrecord(id);
+    }
+}
